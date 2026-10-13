@@ -242,7 +242,7 @@
 
           <div class="confidential-row">
             <input type="checkbox" id="confidentialCheck">
-            <span>Mark as confidential (sensitive/counseling — hide details in the shared log list)</span>
+            <span>Mark as confidential (sensitive/counseling — details are kept only in the spreadsheet; cannot be viewed or edited here after saving)</span>
           </div>
 
           <button class="btn btn-primary" id="saveBtn" onclick="saveEntry()">Save Entry</button>
@@ -624,7 +624,7 @@
             (e.confidential ? '<span class="badge lock">🔒 Confidential</span>' : '');
 
           var detailHtml = e.confidential
-            ? '<div class="label">Details</div><div>Confidential — open in the spreadsheet or edit to view.</div>'
+            ? '<div class="label">Details</div><div>Confidential — details are kept in the spreadsheet only.</div>'
             : (
               (e.topic ? '<div class="label">Topic</div><div>' + escHtml(e.topic) + '</div>' : '') +
               '<div class="label">Summary</div><div>' + escHtml(e.summary).replace(/\n/g, '<br>') + '</div>' +
@@ -642,23 +642,25 @@
             '<div class="entry-body" data-body></div>';
 
           var body = card.querySelector('[data-body]');
-          body.innerHTML = detailHtml +
+          body.innerHTML = detailHtml + (e.confidential ? '' :
             '<div class="btn-row">' +
               '<button class="btn btn-secondary btn-small" data-edit>Edit</button>' +
               '<button class="btn btn-danger btn-small" data-delete>Delete</button>' +
-            '</div>';
+            '</div>');
 
           card.querySelector('.entry-top').addEventListener('click', function() {
             body.classList.toggle('open');
           });
-          body.querySelector('[data-edit]').addEventListener('click', function(ev) {
-            ev.stopPropagation();
-            beginEdit(e);
-          });
-          body.querySelector('[data-delete]').addEventListener('click', function(ev) {
-            ev.stopPropagation();
-            deleteEntry(e.entryId);
-          });
+          if (!e.confidential) {
+            body.querySelector('[data-edit]').addEventListener('click', function(ev) {
+              ev.stopPropagation();
+              beginEdit(e);
+            });
+            body.querySelector('[data-delete]').addEventListener('click', function(ev) {
+              ev.stopPropagation();
+              deleteEntry(e.entryId);
+            });
+          }
 
           list.appendChild(card);
         });
